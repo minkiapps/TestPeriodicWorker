@@ -9,6 +9,7 @@ import androidx.work.*
 import com.minkiapps.workmanagertester.App.Companion.WORKER_NOTIFICATION_CHANNEL_ID
 import com.minkiapps.workmanagertester.R
 import com.minkiapps.workmanagertester.di.workerQualifier
+import com.minkiapps.workmanagertester.util.isBatteryOptimizationIgnored
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -22,15 +23,17 @@ class TestWorker(appContext: Context, params: WorkerParameters) :
     private val prefs: SharedPreferences by inject(workerQualifier)
 
     override suspend fun doWork(): Result {
+
+        val text = "Periodic work just did some work on ${Date()}, BA is off: ${applicationContext.isBatteryOptimizationIgnored()}"
+
         val date = Date()
         prefs.edit {
-            putString(date.time.toString(), "Background Work executed! On ${Date()}")
+            putString(date.time.toString(), text)
         }
 
-        val text = "Periodic work just did some work on ${Date()}"
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notification = NotificationCompat.Builder(applicationContext, WORKER_NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Worker")
+            .setContentTitle("Periodic Worker")
             .setAutoCancel(true)
             .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -45,7 +48,7 @@ class TestWorker(appContext: Context, params: WorkerParameters) :
         private const val TAG = "TestWorker"
 
         fun enqueueTestWorker(workManager: WorkManager) {
-            val request = PeriodicWorkRequestBuilder<TestWorker>(15, TimeUnit.MINUTES)
+            val request = PeriodicWorkRequestBuilder<TestWorker>(1, TimeUnit.HOURS)
                 .setInitialDelay(1, TimeUnit.MINUTES)
                 .addTag(TAG)
                 .build()

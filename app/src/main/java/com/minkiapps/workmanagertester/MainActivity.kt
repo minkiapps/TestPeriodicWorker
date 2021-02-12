@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.minkiapps.workmanagertester.databinding.ActivityMainBinding
@@ -29,6 +30,13 @@ class MainActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
         binding.btnActMainRefresh.setOnClickListener {
+            refreshAdapter()
+        }
+
+        binding.btnActMainDelete.setOnClickListener {
+            prefs.edit(commit = true) {
+                clear()
+            }
             refreshAdapter()
         }
 
